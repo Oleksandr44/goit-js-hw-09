@@ -1,36 +1,41 @@
-const formSet = document.querySelector('.feedback-form');
-const inputinfo = formSet.elements.email;
-const areainfo = formSet.elements.message;
-let saveinfo = { email: '', message: '' };
+const form = document.querySelector('.feedback-form');
+const localStorageKey = 'feedback-form-state';
+const email = form.elements.email;
+const message = form.elements.message;
 
-const parsedinfo = JSON.parse(localStorage.getItem('feedback-form-state'));
+const storedFormData = JSON.parse(localStorage.getItem(localStorageKey)) || {
+  email: '',
+  message: '',
+};
 
-if (parsedinfo !== null) {
-  areainfo.value = parsedinfo.message;
-  inputinfo.value = parsedinfo.email;
+email.value = storedFormData.email;
+message.value = storedFormData.message;
 
-  saveinfo = parsedinfo;
-}
+form.addEventListener('input', event => {
+  const formData = {
+    email: email.value.trim(),
+    message: message.value.trim(),
+  };
 
-formSet.addEventListener('input', event => {
-  const email = event.currentTarget.elements.email.value;
-  const message = event.currentTarget.elements.message.value;
-
-  saveinfo.email = email.trim();
-  saveinfo.message = message.trim();
-  localStorage.setItem('feedback-form-state', JSON.stringify(saveinfo));
+  saveFormData(formData);
 });
 
-formSet.addEventListener('submit', evt => {
-  evt.preventDefault();
-
-  if (saveinfo.email.length == 0 || saveinfo.message.length == 0) {
-    console.log(`please fill all field`);
-  } else {
-    console.log(saveinfo);
-    localStorage.removeItem('feedback-form-state');
-    formSet.reset();
-    saveinfo.email = '';
-    saveinfo.message = '';
+form.addEventListener('submit', function (event) {
+  event.preventDefault();
+  if (email.value == '' || message.value == '') {
+    return alert('All form fields must be filled in');
   }
+  const formData = {
+    email: email.value.trim(),
+    message: message.value.trim(),
+  };
+
+  saveFormData(formData);
+  console.log(formData);
+  form.reset();
+  localStorage.removeItem(localStorageKey);
 });
+
+function saveFormData(formData) {
+  localStorage.setItem('feedback-form-state', JSON.stringify(formData));
+}
